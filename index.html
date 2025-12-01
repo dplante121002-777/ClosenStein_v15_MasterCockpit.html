@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The PlanteMan Method™ – CLOSENSTEIN v3 Cockpit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --jg-green: #00a84f;
+      --jg-green-dark: #00853f;
+      --jg-green-soft: #e6f7ee;
+      --jg-blue-bar: #0057b8;
+      --bg-main: #f5f7fb;
+      --bg-panel: #ffffff;
+      --bg-sidebar: #f0f4fa;
+      --text-main: #182238;
+      --text-muted: #6b7280;
+      --border-soft: #dde3f0;
+      --danger: #c0392b;
+      --accent-yellow: #ffc857;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: "Fira Code", "Consolas", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-main);
+      background: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    h1, h2, h3, h4 {
+      margin: 0 0 0.5rem;
+      font-weight: 700;
+    }
+
+    code, pre {
+      font-family: var(--font-mono);
+      font-size: 15px;
+    }
+
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .top-bar {
+      background: linear-gradient(90deg, var(--jg-blue-bar), var(--jg-green-dark));
+      color: #fff;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 15px;
+    }
+
+    .top-bar-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .top-subtitle {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+    }
+
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .pill-strong {
+      background: #fff;
+      color: var(--jg-green-dark);
+      font-weight: 700;
+    }
+
+    .layout-main {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-soft);
+      display: flex;
+      flex-direction: column;
+      padding: 12px 10px;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .sidebar-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .tab-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tab-button {
+      width: 100%;
+      text-align: left;
+      border-radius: 999px;
+      border: none;
+      padding: 6px 12px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: background 0.15s, transform 0.05s;
+    }
+
+    .tab-button span.index {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      background: #e5edf8;
+      color: #1f2937;
+    }
+
+    .tab-button.active {
+      background: var(--jg-green-soft);
+      color: #064e3b;
+      font-weight: 600;
+    }
+
+    .tab-button.active span.index {
+      background: var(--jg-green);
+      color: #ffffff;
+    }
+
+    .tab-button:hover {
+      background: #e5edf8;
+      transform: translateY(-1px);
+    }
+
+    .tools-list .tab-button span.index {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    /* Content area */
+    .content {
+      flex: 1;
+      padding: 18px 20px;
+      overflow-y: auto;
+    }
+
+    .card {
+      background: var(--bg-panel);
+      border-radius: 14px;
+      border: 1px solid var(--border-soft);
+      padding: 18px 20px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+    }
+
+    .tab-title {
+      font-size: 19px;
+      margin-bottom: 4px;
+    }
+
+    .tab-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .flex-col {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .script-block {
+      background: #f9fafb;
+      border-radius: 10px;
+      border: 1px dashed #d1d5db;
+      padding: 12px 14px;
+      white-space: pre-wrap;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      color: #111827;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border: 1px solid var(--border-soft);
+      background: #f9fafb;
+      color: #4b5563;
+    }
+
+    .badge-green {
+      border-color: rgba(5, 150, 105, 0.4);
+      background: #ecfdf5;
+      color: #065f46;
+      font-weight: 600;
+    }
+
+    .badge-warning {
+      border-color: rgba(251, 191, 36, 0.7);
+      background: #fffbeb;
+      color: #92400e;
+    }
+
+    .badge-danger {
+      border-color: rgba(220, 38, 38, 0.6);
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .field-label {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
+      font-family: var(--font-main);
+    }
+
+    .state-summary {
+      margin-top: 10px;
+      font-size: 13px;
+      background: #f9fafb;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      padding: 10px 12px;
+    }
+
+    .state-summary-row {
+      margin-bottom: 4px;
+    }
+
+    .highlight {
+      background: var(--jg-green-soft);
+      border-left: 4px solid var(--jg-green);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .highlight-danger {
+      background: #fef2f2;
+      border-left-color: var(--danger);
+    }
+
+    .mt-8 { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-20 { margin-top: 20px; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 960px) {
+      .layout-main {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: visible;
+        padding-bottom: 6px;
+      }
+      .content {
+        padding: 14px;
+      }
+      .two-col {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <div class="top-title">The PlanteMan Method™ – CLOSENSTEIN v3 Cockpit</div>
+      <div class="top-subtitle">
+        High-Energy • Clean Savage • Fully Compliant • Speed Closer Edition
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <div class="pill">Built for: David “PlanteMan” Plante</div>
+      <div class="pill pill-strong">Goal: 5 Deals / Day</div>
+    </div>
+  </header>
+
+  <main class="layout-main">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-section-title">Flow</div>
+        <div class="tab-list">
+          <button class="tab-button active" data-tab="tab0">
+            <span class="index">0</span>
+            Frame &amp; NSL Pre-Credit
+          </button>
+          <button class="tab-button" data-tab="tab1">
+            <span class="index">1</span>
+            Deal-or-No-Deal Filter
+          </button>
+          <button class="tab-button" data-tab="tab2">
+            <span class="index">2</span>
+            Pain &amp; NSL Pre-Credit
+          </button>
+          <button class="tab-button" data-tab="tab3">
+            <span class="index">3</span>
+            Loan Review / Stick &amp; Move
+          </button>
+          <button class="tab-button" data-tab="tab4">
+            <span class="index">4</span>
+            Sales Score Impact
+          </button>
+          <button class="tab-button" data-tab="tab5">
+            <span class="index">5</span>
+            Current Path Consequence
+          </button>
+          <button class="tab-button" data-tab="tab6">
+            <span class="index">6</span>
+            Program Review / Approval
+          </button>
+          <button class="tab-button" data-tab="tab7">
+            <span class="index">7</span>
+            Conditions
+          </button>
+          <button class="tab-button" data-tab="tab8">
+            <span class="index">8</span>
+            Savings Quote &amp; Value Anchor
+          </button>
+          <button class="tab-button" data-tab="tab9">
+            <span class="index">9</span>
+            Commitment Check
+          </button>
+          <button class="tab-button" data-tab="tab10">
+            <span class="index">10</span>
+            Enrollment Transition
+          </button>
+          <button class="tab-button" data-tab="tab11">
+            <span class="index">11</span>
+            NSL Disclosure (Verbatim)
+          </button>
+          <button class="tab-button" data-tab="tab12">
+            <span class="index">12</span>
+            A&amp;S / ACDR / Taxes
+          </button>
+          <button class="tab-button" data-tab="tab13">
+            <span class="index">13</span>
+            Objection Navigation
+          </button>
+          <button class="tab-button" data-tab="tab14">
+            <span class="index">14</span>
+            Hard Quote 2-Path Builder
+          </button>
+          <button class="tab-button" data-tab="tab15">
+            <span class="index">15</span>
+            Client Services Codes
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="sidebar-section-title">Tools</div>
+        <div class="tab-list tools-list">
+          <button class="tab-button" data-tab="tabToolsSalesforce">
+            <span class="index">N</span>
+            Salesforce Notes Macro
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <section class="content">
+      <!-- TAB 0 -->
+      <div id="tab0" class="card">
+        <div class="badge badge-green mt-0">Tab 0 — Frame &amp; NSL Pre-Credit Logic</div>
+        <h2 class="tab-title mt-8">Frame &amp; NSL Pre-Credit (State-Aware)</h2>
+        <div class="tab-subtitle">
+          60-second setup to stay 100% compliant: frame the call, check the state, automatically see if NSL
+          disclosure is required <strong>before</strong> pulling credit.
+        </div>
+
+        <div class="two-col">
+          <!-- LEFT COLUMN: FRAME & SCRIPTS -->
+          <div class="flex-col">
+            <h3>1. Opening Frame</h3>
+            <div class="script-block">
+“Hey, this is David with JG Wentworth — this call is recorded for quality.
+My role is to review your information and see which options you may be eligible for
+that could help improve your financial situation. Sound good?”
+            </div>
+
+            <h3 class="mt-16">2. NSL Pre-Credit Disclosure (NSL States Only)</h3>
+            <div id="nslDisclosure" class="script-block">
+[READ THIS BEFORE PULLING CREDIT WHEN THE STATE IS FLAGGED AS NSL]
+
+“Before we review your credit and determine which options you may qualify for,
+I need to go over something with you.
+
+One of the potential options you may be eligible for is with New Start Legal — a law firm
+that provides attorney representation in your state.
+
+Would you like to hear more details about how that works?”
+
+If YES:
+ • Proceed to credit review and the rest of the script.
+
+If NO:
+ “No problem at all. Without reviewing that option, there wouldn’t be anything else I could offer
+  that would realistically help your situation today.
+  If anything changes, feel free to reach out to me directly. I’m always here to help.”
+
+[END CALL IF THEY DECLINE IN AN NSL STATE]
+            </div>
+
+            <h3 class="mt-16">3. Non-NSL States — Standard Verify</h3>
+            <div id="nonNslVerify" class="script-block">
+[USE THIS WHEN THE STATE IS NOT NSL]
+
+“Perfect. Before we dive in, I just need to confirm a few details.”
+
+ • Verify Address
+ • Verify Date of Birth
+ • Verify Last 4 of SSN
+
+“Thank you. Once I pull your report, we’ll review everything together and see which,
+if any, of our programs or partner options would realistically help you today.”
+            </div>
+
+            <div class="highlight-danger mt-16">
+              <strong>Compliance Guardrail:</strong> This tab is your gatekeeper.<br />
+              • Always check the state first.<br />
+              • If the state is NSL, you <strong>must</strong> read the NSL Pre-Credit script before pulling credit.<br />
+              • If they decline NSL in an NSL state, you politely end the call.
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: STATE LOGIC -->
+          <div class="flex-col">
+            <h3>State Logic Console</h3>
+            <p style="font-size:14px;color:var(--text-muted);margin-top:4px;">
+              Type the client’s state and hit Enter or pick from the list.
+              The cockpit will tell you exactly what model you’re in and what you must say.
+            </p>
+
+            <label class="field-label" for="stateInput">Client State</label>
+            <input
+              id="stateInput"
+              class="field-input"
+              list="stateOptions"
+              placeholder="Type e.g. Florida, FL, Ohio, WA..."
+              oninput="handleStateInput()"
+            />
+            <datalist id="stateOptions">
+              <option value="Alabama"></option>
+              <option value="Alaska"></option>
+              <option value="Arizona"></option>
+              <option value="Arkansas"></option>
+              <option value="California"></option>
+              <option value="Colorado"></option>
+              <option value="Connecticut"></option>
+              <option value="Delaware"></option>
+              <option value="Florida"></option>
+              <option value="Georgia"></option>
+              <option value="Hawaii"></option>
+              <option value="Idaho"></option>
+              <option value="Illinois"></option>
+              <option value="Indiana"></option>
+              <option value="Iowa"></option>
+              <option value="Kansas"></option>
+              <option value="Kentucky"></option>
+              <option value="Louisiana"></option>
+              <option value="Maine"></option>
+              <option value="Maryland"></option>
+              <option value="Massachusetts"></option>
+              <option value="Michigan"></option>
+              <option value="Minnesota"></option>
+              <option value="Mississippi"></option>
+              <option value="Missouri"></option>
+              <option value="Montana"></option>
+              <option value="Nebraska"></option>
+              <option value="Nevada"></option>
+              <option value="New Hampshire"></option>
+              <option value="New Jersey"></option>
+              <option value="New Mexico"></option>
+              <option value="New York"></option>
+              <option value="North Carolina"></option>
+              <option value="North Dakota"></option>
+              <option value="Ohio"></option>
+              <option value="Oklahoma"></option>
+              <option value="Oregon"></option>
+              <option value="Pennsylvania"></option>
+              <option value="Puerto Rico"></option>
+              <option value="Rhode Island"></option>
+              <option value="South Carolina"></option>
+              <option value="South Dakota"></option>
+              <option value="Tennessee"></option>
+              <option value="Texas"></option>
+              <option value="Utah"></option>
+              <option value="Vermont"></option>
+              <option value="Virginia"></option>
+              <option value="Washington"></option>
+              <option value="Washington D.C."></option>
+              <option value="West Virginia"></option>
+              <option value="Wisconsin"></option>
+              <option value="Wyoming"></option>
+            </datalist>
+
+            <div id="stateSummary" class="state-summary mt-8">
+              <div class="state-summary-row"><strong>Model:</strong> <span id="stateModel">–</span></div>
+              <div class="state-summary-row"><strong>Program Fee Rule:</strong> <span id="stateFee">–</span></div>
+              <div class="state-summary-row"><strong>Dedicated Savings Acct:</strong> <span id="stateDSA">–</span></div>
+              <div class="state-summary-row"><strong>Special Requirements:</strong> <span id="stateSpecial">–</span></div>
+            </div>
+
+            <div class="mt-16">
+              <span class="badge badge-warning">Quick Reference</span>
+              <ul style="font-size:13px;margin-top:8px;padding-left:18px;">
+                <li>NSL States (29% fee, legal included): CT, DE, GA, HI, IL, KS, ME, MN, NH, NJ, ND, OH, OR, RI, SC, VT, WA, WI, WY.</li>
+                <li>Arnold &amp; Smith (29% + optional legal): West Virginia.</li>
+                <li>Florida: Read FL disclosure + 3-dial rule before agreement.</li>
+                <li>Colorado: Email CO education &amp; do 2-question survey on enrollment.</li>
+                <li>California: 3-day hold after contract before status flips to enrolled.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: DEAL / NO DEAL FILTER (shortened – keep your existing script if you have it) -->
+      <div id="tab1" class="card" style="display:none;">
+        <div class="badge">Tab 1 — Deal-or-No-Deal Filter</div>
+        <h2 class="tab-title mt-8">2-Minute Deal Filter</h2>
+        <div class="tab-subtitle">
+          Qualify fast so you don’t spend 30 minutes on a non-deal. If they fail this tab, you exit with empathy.
+        </div>
+        <div class="script-block">
+“Before we dive in, I just need to confirm a few quick things so I don’t waste your time or mine — fair?”
+
+Employment:
+ “Where are you working currently?”
+
+Income:
+ “What do you typically bring in each month after taxes?”
+ (Program eligibility requires consistent income.)
+
+Checking Account:
+ “You still have an active checking account for bills and deposits, right?”
+
+Pay Frequency:
+ “Are you paid weekly, bi-weekly, or monthly?”
+
+Job Duration:
+ “Been at the current job at least a month?”
+
+If they clearly do NOT qualify:
+ • Politely explain eligibility requires stable income and active checking.
+ • Set a future follow-up if appropriate.
+
+If they qualify:
+ “Perfect. You’re eligible to continue.”
+        </div>
+      </div>
+
+      <!-- The rest of the tabs are placeholders so your layout stays intact.
+           You can drop your longer scripts into these blocks exactly like before. -->
+
+      <div id="tab2" class="card" style="display:none;">
+        <div class="badge">Tab 2 — Pain Discovery &amp; Story</div>
+        <h2 class="tab-title mt-8">Pain Discovery (NEPQ-Style)</h2>
+        <div class="tab-subtitle">Your “why now” story tab. Paste your full NEPQ pain script here if you like.</div>
+        <div class="script-block">
+[Your existing Pain Discovery questions & empathy responses go here.]
+        </div>
+      </div>
+
+      <div id="tab3" class="card" style="display:none;">
+        <div class="badge">Tab 3 — Loan Review / Stick &amp; Move</div>
+        <h2 class="tab-title mt-8">Loan Review &amp; Credit Reality Check</h2>
+        <div class="tab-subtitle">
+          This is where you “stick and move” off the loan fantasy using utilization, over-limits, and denials.
+        </div>
+        <div class="script-block">
+[Paste your Sales Score / credit utilization explanation here, referencing high utilization and why a new loan is unlikely.]
+        </div>
+      </div>
+
+      <div id="tab4" class="card" style="display:none;">
+        <div class="badge">Tab 4 — Sales Score Impact</div>
+        <h2 class="tab-title mt-8">Sales Score / Credit Mix Impact</h2>
+        <div class="script-block">
+[Short explanation of factors from the training workbook: utilization, payment history, mix, new accounts, age of credit.]</div>
+      </div>
+
+      <div id="tab5" class="card" style="display:none;">
+        <div class="badge">Tab 5 — Current Path Consequence</div>
+        <h2 class="tab-title mt-8">Current Path: 30-Year Interest Prison</h2>
+        <div class="script-block">
+[Your “if you keep doing what you’re doing” consequence script lives here.]
+        </div>
+      </div>
+
+      <div id="tab6" class="card" style="display:none;">
+        <div class="badge">Tab 6 — Program Review / Approval</div>
+        <h2 class="tab-title mt-8">Program Structure &amp; Eligibility Recap</h2>
+        <div class="script-block">
+[Program explanation, acceptable/unacceptable debts, settlement %, GFP rules, etc., drawn from workbook.]
+        </div>
+      </div>
+
+      <div id="tab7" class="card" style="display:none;">
+        <div class="badge">Tab 7 — Conditions</div>
+        <h2 class="tab-title mt-8">Core Conditions</h2>
+        <div class="script-block">
+[No new use of cards, impact on credit, collections expectations, etc.]</div>
+      </div>
+
+      <div id="tab8" class="card" style="display:none;">
+        <div class="badge">Tab 8 — Savings Quote &amp; Anchor</div>
+        <h2 class="tab-title mt-8">Savings Quote Builder</h2>
+        <div class="script-block">
+[Hook up your existing savings calculator or paste the call-version script here.]</div>
+      </div>
+
+      <div id="tab9" class="card" style="display:none;">
+        <div class="badge">Tab 9 — Commitment Check</div>
+        <h2 class="tab-title mt-8">Commitment &amp; Fit Check</h2>
+        <div class="script-block">
+[“Is this something you can realistically stick with so this actually works long term?” etc.]</div>
+      </div>
+
+      <div id="tab10" class="card" style="display:none;">
+        <div class="badge">Tab 10 — Enrollment Transition</div>
+        <h2 class="tab-title mt-8">Smooth Enrollment Handoff</h2>
+        <div class="script-block">
+[Welcome call expectations, CFT/Global explanation, creditor call guidance.]</div>
+      </div>
+
+      <div id="tab11" class="card" style="display:none;">
+        <div class="badge">Tab 11 — NSL Disclosure (Verbatim)</div>
+        <h2 class="tab-title mt-8">NSL Relationship Disclosure</h2>
+        <div class="script-block">
+[Paste the full NSL relationship disclosure from the workbook, exactly as provided, for ATM states.]</div>
+      </div>
+
+      <div id="tab12" class="card" style="display:none;">
+        <div class="badge">Tab 12 — A&amp;S / ACDR / Taxes</div>
+        <h2 class="tab-title mt-8">Arnold &amp; Smith • ACDR • Tax Language</h2>
+        <div class="script-block">
+[Arnold &amp; Smith disclosure + ACDR bullet points + IRS Form 982 language.]</div>
+      </div>
+
+      <div id="tab13" class="card" style="display:none;">
+        <div class="badge">Tab 13 — Objection Navigation</div>
+        <h2 class="tab-title mt-8">Objections &amp; Rebuttals (Advanced)</h2>
+        <div class="script-block">
+[Your full objection handling tree goes here – “Think about it”, “Need to talk to spouse”, “Credit score”, etc.]</div>
+      </div>
+
+      <div id="tab14" class="card" style="display:none;">
+        <div class="badge">Tab 14 — Hard Quote 2-Path Builder</div>
+        <h2 class="tab-title mt-8">Hard Quote Script + Email Version</h2>
+        <div class="script-block">
+[The current vs new deposit, months, monthly savings and total savings script, plus the email version you send when they stall.]</div>
+      </div>
+
+      <div id="tab15" class="card" style="display:none;">
+        <div class="badge">Tab 15 — Client Services Codes</div>
+        <h2 class="tab-title mt-8">Client Services / Transfer Codes</h2>
+        <div class="script-block">
+105 – JGW Welcome Calls
+110 – New Start Legal Welcome Calls
+109 – Arnold &amp; Smith Welcome Calls
+104 – All Other Transfers
+119 – Home Equity Cashout (HEC) product
+
+[You can expand this with more notes/codes as needed.]
+        </div>
+      </div>
+
+      <!-- TOOLS TAB -->
+      <div id="tabToolsSalesforce" class="card" style="display:none;">
+        <div class="badge">Tool — Salesforce Notes Macro</div>
+        <h2 class="tab-title mt-8">Salesforce Notes Macro</h2>
+        <div class="script-block">
+[Paste your one-click macro text for dropping the hard quote, objection notes, and commitment level into SF.]</div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script>
+  // --- STATE LOGIC ---
+
+  const NSL_STATES = [
+    "Connecticut","Delaware","Georgia","Hawaii","Illinois","Kansas","Maine",
+    "Minnesota","New Hampshire","New Jersey","North Dakota","Ohio","Oregon",
+    "Rhode Island","South Carolina","Vermont","Washington","Wisconsin","Wyoming"
+  ];
+
+  const ARNOLD_SMITH_STATES = ["West Virginia"];
+
+  const SPECIAL_RULES = {
+    "Florida": "Read FL disclosure before agreement; max 3 outbound dials in 24 hours.",
+    "Colorado": "Email Colorado education material on initial call and complete 2-question survey on enrollment.",
+    "California": "3-day hold after contract; status auto-flips to Enrolled after hold period.",
+  };
+
+  const DSA_BY_STATE = {
+    "Minnesota": "Global Holdings (NSL – per state grid)",
+    "Nevada": "Global Holdings (JGW – per state grid)",
+    "West Virginia": "Global Holdings (A&S)",
+  };
+
+  function normalizeState(input) {
+    if (!input) return "";
+    input = input.trim().toLowerCase();
+    const map = {
+      "fl": "Florida", "ca": "California", "co": "Colorado", "oh": "Ohio",
+      "wa": "Washington", "wv": "West Virginia", "ny": "New York", "nj": "New Jersey",
+      "ga": "Georgia", "or": "Oregon", "sc": "South Carolina", "vt": "Vermont",
+      "wi": "Wisconsin", "mn": "Minnesota", "ct": "Connecticut", "de": "Delaware",
+      "dc": "Washington D.C."
+    };
+    if (map[input]) return map[input];
+
+    // Try to title-case a full state name
+    return input.replace(/\b\w/g, (m) => m.toUpperCase());
+  }
+
+  function handleStateInput() {
+    const raw = document.getElementById("stateInput").value;
+    const state = normalizeState(raw);
+    const modelEl = document.getElementById("stateModel");
+    const feeEl = document.getElementById("stateFee");
+    const dsaEl = document.getElementById("stateDSA");
+    const specialEl = document.getElementById("stateSpecial");
+    const nslBlock = document.getElementById("nslDisclosure");
+    const nonNslBlock = document.getElementById("nonNslVerify");
+
+    if (!state) {
+      modelEl.textContent = "–";
+      feeEl.textContent = "–";
+      dsaEl.textContent = "–";
+      specialEl.textContent = "–";
+      nslBlock.style.opacity = "1";
+      nonNslBlock.style.opacity = "1";
+      return;
+    }
+
+    let model, feeRule, dsa, special = [];
+
+    const isNSL = NSL_STATES.includes(state);
+    const isAS = ARNOLD_SMITH_STATES.includes(state);
+
+    if (isNSL) {
+      model = "NSL Attorney Model (29% fee, legal included)";
+      feeRule = "29% of balances enrolled (NSL – built into deposit).";
+    } else if (isAS) {
+      model = "Arnold & Smith Attorney Model (29% fee + optional legal service).";
+      feeRule = "29% of balances enrolled + optional monthly legal fee.";
+    } else {
+      model = "Standard JGW Program State (non-NSL).";
+      feeRule = "Program fee based on JGW matrix; manager approval required under 25%.";
+    }
+
+    dsa = DSA_BY_STATE[state] || "CFT Pay (or Global per workable-states grid).";
+
+    if (SPECIAL_RULES[state]) {
+      special.push(SPECIAL_RULES[state]);
+    }
+    if (!SPECIAL_RULES[state] && isNSL) {
+      special.push("NSL state: must read NSL pre-credit disclosure before pulling credit.");
+    }
+    if (!isNSL && !isAS && !SPECIAL_RULES[state]) {
+      special.push("Standard JGW scripting; verify Address / DOB / Last 4 before credit pull.");
+    }
+
+    modelEl.textContent = model;
+    feeEl.textContent = feeRule;
+    dsaEl.textContent = dsa;
+    specialEl.textContent = special.join(" ");
+
+    // Show/hide NSL vs non-NSL script emphasis
+    if (isNSL) {
+      nslBlock.style.opacity = "1";
+      nslBlock.style.borderColor = "#16a34a";
+      nonNslBlock.style.opacity = "0.35";
+      nonNslBlock.style.borderColor = "#e5e7eb";
+    } else {
+      nslBlock.style.opacity = "0.35";
+      nslBlock.style.borderColor = "#e5e7eb";
+      nonNslBlock.style.opacity = "1";
+      nonNslBlock.style.borderColor = "#16a34a";
+    }
+  }
+
+  // --- TAB SWITCHING ---
+
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabPanels = {
+    tab0: document.getElementById("tab0"),
+    tab1: document.getElementById("tab1"),
+    tab2: document.getElementById("tab2"),
+    tab3: document.getElementById("tab3"),
+    tab4: document.getElementById("tab4"),
+    tab5: document.getElementById("tab5"),
+    tab6: document.getElementById("tab6"),
+    tab7: document.getElementById("tab7"),
+    tab8: document.getElementById("tab8"),
+    tab9: document.getElementById("tab9"),
+    tab10: document.getElementById("tab10"),
+    tab11: document.getElementById("tab11"),
+    tab12: document.getElementById("tab12"),
+    tab13: document.getElementById("tab13"),
+    tab14: document.getElementById("tab14"),
+    tab15: document.getElementById("tab15"),
+    tabToolsSalesforce: document.getElementById("tabToolsSalesforce"),
+  };
+
+  tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-tab");
+      // toggle active classes
+      tabButtons.forEach((b) => b.classList.toggle("active", b === btn));
+      Object.keys(tabPanels).forEach((key) => {
+        tabPanels[key].style.display = key === id ? "block" : "none";
+      });
+    });
+  });
+</script>
+</body>
+</html>
